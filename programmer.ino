@@ -48,7 +48,7 @@ unsigned long buttonDebounce = 0;
 char * currentSettingsOption = "";
 char * currentSettingsValue = "";
 int currentSettingsPart = SETTINGS;
-byte oldfilterLogLin, oldampLogLin, oldmidiChannel, oldAfterTouchDest, oldNotePriority, oldFilterLoop, oldAmpLoop;
+byte oldfilterLogLin, oldampLogLin, oldmidiChannel, oldAfterTouchDest, oldNotePriority, oldFilterLoop, oldAmpLoop, oldClockSource;
 
 unsigned long timer = 0;
 ShiftRegister74HC595<3> sr(12, 13, 14);
@@ -290,6 +290,30 @@ void setup() {
     case 2:
       sr.set(ALOOPBIT0, HIGH);
       sr.set(ALOOPBIT1, HIGH);
+      break;
+  }
+
+  // Read ClockSource from EEPROM
+
+  ClockSource = getClockSource();
+  if (ClockSource < 0 || ClockSource > 2) {
+    storeClockSource(0);
+  }
+  oldClockSource = ClockSource;
+  switch (ClockSource) {
+    case 0:
+      sr.set(EXTCLOCK, LOW);
+      sr.set(MIDICLOCK, LOW);
+      break;
+
+    case 1:
+      sr.set(EXTCLOCK, HIGH);
+      sr.set(MIDICLOCK, LOW);
+      break;
+
+    case 2:
+      sr.set(EXTCLOCK, LOW);
+      sr.set(MIDICLOCK, HIGH);
       break;
   }
 
@@ -626,6 +650,26 @@ void checkForChanges() {
         break;
     }
     oldAmpLoop = AmpLoop;
+  }
+
+  if (ClockSource != oldClockSource) {
+    switch (ClockSource) {
+      case 0:
+        sr.set(EXTCLOCK, LOW);
+        sr.set(MIDICLOCK, LOW);
+        break;
+
+      case 1:
+        sr.set(EXTCLOCK, HIGH);
+        sr.set(MIDICLOCK, LOW);
+        break;
+
+      case 2:
+        sr.set(EXTCLOCK, LOW);
+        sr.set(MIDICLOCK, HIGH);
+        break;
+    }
+    oldClockSource = ClockSource;
   }
 }
 
