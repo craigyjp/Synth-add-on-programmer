@@ -48,7 +48,7 @@ unsigned long buttonDebounce = 0;
 char * currentSettingsOption = "";
 char * currentSettingsValue = "";
 int currentSettingsPart = SETTINGS;
-byte oldfilterLogLin, oldampLogLin, oldmidiChannel, oldAfterTouchDest, oldNotePriority;
+byte oldfilterLogLin, oldampLogLin, oldmidiChannel, oldAfterTouchDest, oldNotePriority, oldFilterLoop, oldAmpLoop;
 
 unsigned long timer = 0;
 ShiftRegister74HC595<3> sr(12, 13, 14);
@@ -245,6 +245,53 @@ void setup() {
       break;
   }
 
+  // Read FilterLoop from EEPROM
+
+  FilterLoop = getFilterLoop();
+  if (FilterLoop < 0 || FilterLoop > 2) {
+    storeFilterLoop(0);
+  }
+  oldFilterLoop = FilterLoop;
+  switch (FilterLoop) {
+    case 0:
+      sr.set(FLOOPBIT0, LOW);
+      sr.set(FLOOPBIT1, LOW);
+      break;
+
+    case 1:
+      sr.set(FLOOPBIT0, HIGH);
+      sr.set(FLOOPBIT1, LOW);
+      break;
+
+    case 2:
+      sr.set(FLOOPBIT0, HIGH);
+      sr.set(FLOOPBIT1, HIGH);
+      break;
+  }
+
+  // Read FilterLoop from EEPROM
+
+  AmpLoop = getAmpLoop();
+  if (AmpLoop < 0 || AmpLoop > 2) {
+    storeAmpLoop(0);
+  }
+  oldAmpLoop = AmpLoop;
+  switch (AmpLoop) {
+    case 0:
+      sr.set(ALOOPBIT0, LOW);
+      sr.set(ALOOPBIT1, LOW);
+      break;
+
+    case 1:
+      sr.set(ALOOPBIT0, HIGH);
+      sr.set(ALOOPBIT1, LOW);
+      break;
+
+    case 2:
+      sr.set(ALOOPBIT0, HIGH);
+      sr.set(ALOOPBIT1, HIGH);
+      break;
+  }
 
   //
   //  //Read Pitch Bend Range from EEPROM
@@ -537,6 +584,48 @@ void checkForChanges() {
         break;
     }
     oldNotePriority = NotePriority;
+  }
+
+  if (FilterLoop != oldFilterLoop) {
+    switch (FilterLoop) {
+      case 0:
+        sr.set(FLOOPBIT0, LOW);
+        sr.set(FLOOPBIT1, LOW);
+        break;
+
+      case 1:
+        sr.set(FLOOPBIT0, HIGH);
+        sr.set(FLOOPBIT1, LOW);
+        break;
+
+      case 2:
+        sr.set(FLOOPBIT0, HIGH);
+        sr.set(FLOOPBIT1, HIGH);
+        break;
+    }
+    oldFilterLoop = FilterLoop;
+  }
+
+  // Read FilterLoop from EEPROM
+
+  if (AmpLoop != oldAmpLoop) {
+    switch (AmpLoop) {
+      case 0:
+        sr.set(ALOOPBIT0, LOW);
+        sr.set(ALOOPBIT1, LOW);
+        break;
+
+      case 1:
+        sr.set(ALOOPBIT0, HIGH);
+        sr.set(ALOOPBIT1, LOW);
+        break;
+
+      case 2:
+        sr.set(ALOOPBIT0, HIGH);
+        sr.set(ALOOPBIT1, HIGH);
+        break;
+    }
+    oldAmpLoop = AmpLoop;
   }
 }
 
