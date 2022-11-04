@@ -9,6 +9,10 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
+#include <MCP4922.h>
+#include <SPI.h>
+MCP4922 DAC(2,1,0,9);    // (MOSI,SCK,CS,LDAC) define Connections for MEGA_board, 
+
 
 #define SETTINGS 0       //Settings page
 #define SETTINGSVALUE 1  //Settings page
@@ -65,7 +69,8 @@ void setup() {
 
   setupHardware();
   renderBootUpPage();
-
+  //DAC.Set(2048,2048);
+  
   //Read MIDI Channel from EEPROM
 
   midiChannel = getMIDIChannel();
