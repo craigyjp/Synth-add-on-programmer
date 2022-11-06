@@ -11,8 +11,7 @@
 
 #include <MCP4922.h>
 #include <SPI.h>
-MCP4922 DAC(2,1,0,9);    // (MOSI,SCK,CS,LDAC) define Connections for MEGA_board, 
-
+MCP4922 DAC(2, 1, 0, 9);
 
 #define SETTINGS 0       //Settings page
 #define SETTINGSVALUE 1  //Settings page
@@ -52,7 +51,7 @@ unsigned long buttonDebounce = 0;
 char * currentSettingsOption = "";
 char * currentSettingsValue = "";
 int currentSettingsPart = SETTINGS;
-byte oldfilterLogLin, oldampLogLin, oldmidiChannel, oldAfterTouchDest, oldNotePriority, oldFilterLoop, oldAmpLoop, oldClockSource;
+byte oldfilterLogLin, oldampLogLin, oldmidiChannel, oldAfterTouchDest, oldNotePriority, oldFilterLoop, oldAmpLoop, oldClockSource, oldafterTouchDepth;
 
 unsigned long timer = 0;
 ShiftRegister74HC595<3> sr(12, 13, 14);
@@ -69,12 +68,11 @@ void setup() {
 
   setupHardware();
   renderBootUpPage();
-  //DAC.Set(2048,2048);
-  
+
   //Read MIDI Channel from EEPROM
 
   midiChannel = getMIDIChannel();
-  if (midiChannel < 0 || midiChannel > 16) {
+  if (midiChannel < 0 || midiChannel > 15) {
     storeMidiChannel(0);
   }
   oldmidiChannel = midiChannel;
@@ -322,14 +320,66 @@ void setup() {
       break;
   }
 
-  //
-  //  //Read Pitch Bend Range from EEPROM
-  //  //pitchBendRange = getPitchBendRange();
-  //
-  //  //Read Mod Wheel Depth from EEPROM
-  modWheelDepth = getModWheelDepth();
-  if (modWheelDepth < 1 || modWheelDepth > 10) {
-    storeModWheelDepth(10);
+  //  //Read aftertouch Depth from EEPROM
+  afterTouchDepth = getafterTouchDepth();
+  if (afterTouchDepth < 0 || afterTouchDepth > 10) {
+    storeafterTouchDepth(0);
+  }
+  oldafterTouchDepth = afterTouchDepth;
+  switch (afterTouchDepth) {
+    case 0:
+      DAC1 = 0;
+      DAC.Set(DAC0, DAC1);
+      break;
+
+    case 1:
+      DAC1 = 164;
+      DAC.Set(DAC0, DAC1);
+      break;
+
+    case 2:
+      DAC1 = 328;
+      DAC.Set(DAC0, DAC1);
+      break;
+
+    case 3:
+      DAC1 = 492;
+      DAC.Set(DAC0, DAC1);
+      break;
+
+    case 4:
+      DAC1 = 656;
+      DAC.Set(DAC0, DAC1);
+      break;
+
+    case 5:
+      DAC1 = 840;
+      DAC.Set(DAC0, DAC1);
+      break;
+
+    case 6:
+      DAC1 = 1024;
+      DAC.Set(DAC0, DAC1);
+      break;
+
+    case 7:
+      DAC1 = 1188;
+      DAC.Set(DAC0, DAC1);
+      break;
+
+    case 8:
+      DAC1 = 1352;
+      DAC.Set(DAC0, DAC1);
+
+    case 9:
+      DAC1 = 1536;
+      DAC.Set(DAC0, DAC1);
+      break;
+
+    case 10:
+      DAC1 = 1720;
+      DAC.Set(DAC0, DAC1);
+      break;
   }
 
   //Read Encoder Direction from EEPROM
@@ -675,6 +725,65 @@ void checkForChanges() {
         break;
     }
     oldClockSource = ClockSource;
+  }
+
+  if (afterTouchDepth != oldafterTouchDepth) {
+    switch (afterTouchDepth) {
+      case 0:
+        DAC1 = 0;
+        DAC.Set(DAC0, DAC1);
+        break;
+
+      case 1:
+        DAC1 = 164;
+        DAC.Set(DAC0, DAC1);
+        break;
+
+      case 2:
+        DAC1 = 328;
+        DAC.Set(DAC0, DAC1);
+        break;
+
+      case 3:
+        DAC1 = 492;
+        DAC.Set(DAC0, DAC1);
+        break;
+
+      case 4:
+        DAC1 = 656;
+        DAC.Set(DAC0, DAC1);
+        break;
+
+      case 5:
+        DAC1 = 840;
+        DAC.Set(DAC0, DAC1);
+        break;
+
+      case 6:
+        DAC1 = 1024;
+        DAC.Set(DAC0, DAC1);
+        break;
+
+      case 7:
+        DAC1 = 1188;
+        DAC.Set(DAC0, DAC1);
+        break;
+
+      case 8:
+        DAC1 = 1352;
+        DAC.Set(DAC0, DAC1);
+
+      case 9:
+        DAC1 = 1536;
+        DAC.Set(DAC0, DAC1);
+        break;
+
+      case 10:
+        DAC1 = 1720;
+        DAC.Set(DAC0, DAC1);
+        break;
+    }
+    oldafterTouchDepth = afterTouchDepth;
   }
 }
 
